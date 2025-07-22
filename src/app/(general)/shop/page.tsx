@@ -1,28 +1,37 @@
-'use client';
+"use client";
 
 import { Book, getBookList } from "@/api/api";
 import BookCard from "@/components/BookCard";
+import { useUserContext } from "@/context/useUser";
 import { PlusCircle, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Shop() {
+  const { user } = useUserContext();
+
   const [books, setBooks] = useState<Book[]>([]);
 
   useEffect(() => {
+    if (!user) {
+      redirect("/login");
+    }
+
     const fetchBooks = async () => {
-      const data = await getBookList();
+      const data = await getBookList(user.accessToken!);
       setBooks(data);
       console.log(data);
     };
+
     fetchBooks();
-  }, []);
+  }, [user]);
 
   const handleDelete = (bookId: string) => {
-    if (window.confirm('Are you sure you want to delete this book?')) {
-      console.log('Deleting book with id:', bookId);
+    if (window.confirm("Are you sure you want to delete this book?")) {
+      console.log("Deleting book with id:", bookId);
       // Here you would make an API call to delete the book
-      setBooks(books.filter(book => book.id !== bookId));
+      setBooks(books.filter((book) => book.id !== bookId));
     }
   };
 
